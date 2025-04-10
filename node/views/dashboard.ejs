@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Signature Verifier</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #1D1D1B;
+      padding: 10px 20px;
+      color: #fff;
+      height: 55px;
+    }
+    .navbar .logo {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .navbar .logo img {
+      height: 24px;
+      margin-right: 8px;
+    }
+    .navbar .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+    .navbar .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .navbar .nav-links a:hover {
+      text-decoration: underline;
+    }
+    .upload-container {
+      width: 90%;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border: solid gray 1px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .upload-box {
+      background: #f9f9f9;
+      border: 2px #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    .upload-box:hover {
+      border-color: #a3a3ff;
+    }
+    .upload-box input[type="file"] {
+      display: none;
+    }
+    .upload-box p {
+      color: #888;
+    }
+    .upload-box span {
+      font-weight: bold;
+      color: #6b5ce7;
+    }
+    .container {
+      width: 90%;
+      margin: 15px auto;
+      background: transparent;
+      padding: 0px;
+      text-align: center;
+    }
+    header h1 {
+      color: #4c4c4c;
+    }
+    header p {
+      margin-top: 10px;
+      color: #888;
+    }
+    .history-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 10px;
+    }
+    .history-section p {
+      color: #333;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #a3a3ff;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: not-allowed;
+      font-size: 14px;
+    }
+    button:enabled {
+      background-color: #6b5ce7;
+      cursor: pointer;
+    }
+    .navbar .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+    .navbar .user-menu img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .navbar .user-menu .dropdown {
+      width: 150px;
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+    .navbar .user-menu .dropdown a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .navbar .user-menu .dropdown a:hover {
+      background-color: #ddd;
+    }
+    .navbar .user-menu:hover .dropdown {
+      display: block;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-wrap: wrap;
+        height: auto;
+      }
+      .navbar .logo img {
+        height: 20px;
+        margin-right: 5px;
+      }
+      .navbar .nav-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .upload-container, .container {
+        width: 95%;
+        padding: 15px;
+      }
+      header h1 {
+        font-size: 1.5rem;
+      }
+      header p {
+        font-size: 0.9rem;
+      }
+      button {
+        width: 100%;
+        font-size: 14px;
+      }
+      table {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar {
+        padding: 10px;
+      }
+      .upload-box {
+        padding: 15px;
+      }
+      button {
+        font-size: 12px;
+      }
+    }
+    .email-input-container {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .email-input-container input {
+      width: 80%;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">
+        <img src="/images/logo3.png" alt="Logo">
+      </div>
+      <div class="user-menu">
+        <form action="/api/profile" method="get" style="margin: 0;">
+          <button class="fas fa-user-alt" type="submit" id="Profile" style="font-size: 1.5rem; font-weight: 600; color: #f9f9f9; background-color: black; margin: 10px 0;"></button>
+        </form>
+      </div>
+    </nav>
+  
+    <!-- Upload File Section -->
+    <div class="container">
+      <header>
+        <h1>Digital Signature Verifier</h1>
+        <p>Upload digitally signed documents to verify the validity of signatures and the documents.</p>
+      </header>
+    </div>
+    
+    <!-- Email Input -->
+    <div class="email-input-container">
+      <label for="email">Enter your email:</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    </div>
+  
+    <div class="upload-container">
+      <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <img src="/images/logo2.jpeg" alt="Upload Icon">
+        <p>Click to Upload or <span>drag and drop</span></p>
+        <p class="file-info" style="font-size: x-small;">Supported Format: JPG, PNG, JPEG (Max Limit 25 MB per document)</p>
+        <input type="file" id="fileInput" name="image"  accept=".jpg, .jpeg, .png, .gif" onchange="handleFiles(event)" style="display:none;">
+      </div>
+    </div>
+  
+    <div class="upload-container">
+      <div class="history-section">
+        <p><strong>Uploaded Files (0)</strong></p>
+        <p>File uploaded for digital signature verification.</p>
+        <button id="verifyButton" disabled onclick="initiateVerification()">Initiate Verification</button>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+          <tr>
+            <th style="text-align: center; padding: 8px; border-bottom: 1px solid #ccc;">Image</th>
+            <th style="text-align: center; padding: 8px; border-bottom: 1px solid #ccc;">Result</th>
+          </tr>
+        </thead>
+        <tbody id="uploadedFilesTable">
+          <tr>
+            <td id="a">File not uploaded</td>
+            <td id="b"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <script>
+      const fileInput = document.getElementById('fileInput');
+      const emailInput = document.getElementById('email');
+      const uploadedFilesTable = document.getElementById('uploadedFilesTable');
+      const verifyButton = document.getElementById('verifyButton');
+      let uploadedFilesCount = 0;
+      let filesToUpload = [];
+  
+
+fileInput.addEventListener('change', (event) => {
+    const files = Array.from(event.target.files);
+
+    // Clear existing rows (optional if you want to keep previous uploads)
+    uploadedFilesTable.innerHTML = '';
+
+    files.forEach((file) => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                // Add the image and filename to the table
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <img src="${e.target.result}" alt="${file.name}" style="width: 100px; height: auto; border-radius: 5px;">
+                        <br>${file.name}
+                    </td>
+                    <td><span class="pending-verification">Pending Verification</span></td>
+                `;
+                uploadedFilesTable.appendChild(row);
+            };
+
+            reader.readAsDataURL(file); // Read the file as a Data URL
+        } else {
+            alert('Please upload a valid image file (e.g., PNG, JPEG).');
+        }
+    });
+});
+
+
+      async function handleFiles(event) {
+        const files = Array.from(event.target.files);
+        filesToUpload = files;
+  
+        // Enable the verify button after file selection
+        if (filesToUpload.length > 0) {
+          verifyButton.disabled = false;
+        }
+  
+        // Update the table to show the selected files
+        updateFileTable(filesToUpload);
+      }
+  
+      async function initiateVerification() {
+  if (filesToUpload.length === 0) {
+    console.error('No files selected');
+    return;
+  }
+
+  const email = emailInput.value.trim();
+  if (!email || !validateEmail(email)) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('email', email);  // Include email in FormData
+  filesToUpload.forEach((file) => formData.append('image', file));  // Add images to FormData
+
+  try {
+    // Send the formData to the server using fetch
+    const response = await fetch('/api/dashboard', {
+      method: 'POST',
+      body: formData,  // Send the image data as multipart/form-data
+    });
+
+    // Handle JSON response from the server
+    const result = await response.json();
+
+    // If the upload is successful, update the table with filename and prediction
+    if (result.success) {
+      updateFileTable([{ 
+        name: result.filename, 
+        prediction: result.prediction,
+        base64Image: result.base64Image  // Assuming the backend sends a base64 image string
+      }]);
+    } else {
+      console.error("File upload failed:", result.message);
+    }
+  } catch (error) {
+    console.error("Error uploading file:", error);
+  }
+}
+
+function updateFileTable(files) {
+  uploadedFilesTable.innerHTML = ''; // Clear existing rows
+  files.forEach((file) => {
+    const row = document.createElement('tr');
+    const fileUrl = file.base64Image || ''; // Use base64 image data received from the server
+    row.innerHTML = `
+      <td>
+        <img src="${fileUrl}" alt="${file.filename || 'Unnamed'}" style="width: 100px; height: auto; border-radius: 5px;">
+        <br>${file.filename || 'Unnamed'}
+      </td>
+      <td><span class="pending-verification">${file.prediction || 'Pending Verification'}</span></td>
+    `;
+    uploadedFilesTable.appendChild(row);
+  });
+
+  // Update the count of uploaded files in the history section
+  uploadedFilesCount = files.length;
+  document.querySelector('.history-section p strong').textContent = `Uploaded Files (${uploadedFilesCount})`;
+}
+
+
+      // Simple email validation function
+      function validateEmail(email) {
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        return emailPattern.test(email);
+      }
+    </script>
+  </body>
+</html>
